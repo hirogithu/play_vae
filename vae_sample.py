@@ -34,12 +34,12 @@ def main():
         resultsample = torch.cat([x, x_rec]) * 0.5 + 0.5
         resultsample = resultsample.cpu()
         save_image(resultsample.view(-1, 3, im_size, im_size),
-                    'results_rec/sample_encode_.png')
+                    'results/rec/sample_encode_.png')
         x_rec = vae.decode(sample1)
         resultsample = x_rec * 0.5 + 0.5
         resultsample = resultsample.cpu()
         save_image(resultsample.view(-1, 3, im_size, im_size),
-                    'results_gen/sample_decode_.png')
+                    'results/gen/sample_decode_.png')
 
 
 if __name__ == '__main__':

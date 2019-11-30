@@ -124,8 +124,8 @@ def main():
 
             #############################################
 
-            os.makedirs('results_rec', exist_ok=True)
-            os.makedirs('results_gen', exist_ok=True)
+            os.makedirs('results/rec', exist_ok=True)
+            os.makedirs('results/gen', exist_ok=True)
 
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
