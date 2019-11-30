@@ -1,4 +1,9 @@
-# ファイル構成
+### 開発日記
+
+Qiitaで記録中
+https://qiita.com/roki_ML/private/481de72839eae7cf98ff
+
+### ファイル構成
 
 - "main.py" : face recommender system. 入力画像に類似した画像を検索表示する．
 - "make_search_space.py" : VAEの学習用．重みを保存する．
