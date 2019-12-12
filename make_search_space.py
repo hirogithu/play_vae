@@ -31,6 +31,8 @@ from dlutils.pytorch.cuda_helper import *
 from PIL import Image
 from imageio import imread
 
+from matplolib.pyplot as plt
+
 from vae import VAE # from net import *
 
 im_size = 128
@@ -47,21 +49,34 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.mean(torch.mean(1 + logvar - mu.pow(2) - logvar.exp(), 1))
     return BCE, KLD * 0.1
 
-
 def process_batch(batch):
-#    data = [misc.imresize(x, [im_size, im_size]).transpose((2, 0, 1)) for x in batch]
+    #data = [misc.imresize(x, [im_size, im_size]).transpose((2, 0, 1)) for x in batch]
     data = [np.array(Image.fromarray(x).resize([im_size, im_size])).transpose((2, 0, 1)) for x in batch]
-    x = torch.from_numpy(np.asarray(data, dtype=np.float32)) / 127.5 - 1.
-    # x = torch.from_numpy(np.asarray(data, dtype=np.float32)).cuda() / 127.5 - 1.
+
+    if device == "cuda":
+        x = torch.from_numpy(np.asarray(data, dtype=np.float32)).cuda() / 127.5 - 1.
+
+    else:
+        x = torch.from_numpy(np.asarray(data, dtype=np.float32)) / 127.5 - 1.
+
     x = x.view(-1, 3, im_size, im_size)
+
     return x
+
+def plt_rec_kl_loss(rec_loss, kl_loss):
+    plt.plot(rec_loss_history, label="rec loss")
+    plt.plot(kl_loss_history, label="kl loss")
+    plt.title("Loss rec/kl")
+    plt.legend()
+    plt.show()    
 
 
 def main():
     batch_size = 128
     z_size = 64
     vae = VAE(zsize=z_size, layer_count=5)
-#    vae.cuda()
+    if device == "cuda":
+        vae.cuda()
     vae.train()
     vae.weight_init(mean=0, std=0.02)
 
@@ -74,7 +89,9 @@ def main():
     #sample1 = torch.randn(128, z_size).view(-1, z_size, 1, 1)
 
     dir_ls = glob.glob("train_img/PINS/*")
-    #print(dir_ls)
+
+    rec_loss_history = []
+    kl_loss_history = []
 
     for epoch in range(train_epoch):
         vae.train()
@@ -156,10 +173,17 @@ def main():
 
         print('\n[%d/%d] - ptime: %.2f, rec loss: %.9f, KL loss: %.9f' % (
             (epoch + 1), train_epoch, per_epoch_ptime, rec_loss, kl_loss))
+
+        rec_loss_history.append(rec_loss)
+        kl_loss_history.append(kl_loss)
+
         if ((epoch + 1) % 10 == 0) and (epoch + 1 != train_epoch):
             torch.save(vae.state_dict(), "VAEmodel.pkl")
         del batches
         del data_train
+    
+    plt_rec_kl_loss(rec_loss, kl_loss)
+
     print("Training finish!... save training results")
     torch.save(vae.state_dict(), "VAEmodel.pkl")
 
