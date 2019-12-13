@@ -34,13 +34,13 @@ def detect_face(image):
     # 顔検出画像表示
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.show()
-    # 顔検出画像出力
-    cv2.imwrite("../output_image/out.jpg", img)
+    # 顔検出画像(枠付き)出力
+    #cv2.imwrite("../output_img/out.jpg", img)
 
     # 検出画像出力
     for (x, y, w, h) in front_face_list:
         face_img = origin_img[y:y+h, x:x+w]
-        filename = "../output_image/face_" + str(x) + "-" + str(y) + ".jpg"
+        filename = "../output_img/face_" + str(x) + "-" + str(y) + ".jpg"
         cv2.imwrite(filename, face_img)
 
 def plt_img(image):

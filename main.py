@@ -19,3 +19,5 @@ if __name__ == "__main__":
             flag = input("Search image likely the person? [y/N]")
         if flag == "y":
             likely_images_list = search_img.get_likely_image(face)
+        else:
+            break

@@ -31,7 +31,7 @@ from dlutils.pytorch.cuda_helper import *
 from PIL import Image
 from imageio import imread
 
-from matplolib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from vae import VAE # from net import *
 
@@ -64,12 +64,17 @@ def process_batch(batch):
     return x
 
 def plt_rec_kl_loss(rec_loss, kl_loss):
-    plt.plot(rec_loss_history, label="rec loss")
-    plt.plot(kl_loss_history, label="kl loss")
-    plt.title("Loss rec/kl")
+    plt.plot(kl_loss, label="kl loss")
+    plt.title("Loss kl")
     plt.legend()
-    plt.show()    
+    plt.savefig("./KLloss.png")
+    plt.show()
 
+    plt.plot(rec_loss, label="rec loss")
+    plt.title("Loss rec")
+    plt.legend()
+    plt.savefig("./Recloss.png")
+    plt.show()
 
 def main():
     batch_size = 128
@@ -84,7 +89,7 @@ def main():
 
     vae_optimizer = optim.Adam(vae.parameters(), lr=lr, betas=(0.5, 0.999), weight_decay=1e-5)
 
-    train_epoch = 20
+    train_epoch = 15
 
     #sample1 = torch.randn(128, z_size).view(-1, z_size, 1, 1)
 
@@ -99,20 +104,15 @@ def main():
         # with open('data_fold_%d.pkl' % (epoch % 5), 'rb') as pkl:
             #data_train = pickle.load(pkl)
         data_train_ls = []
-        for i, dir_ in enumerate(dir_ls[epoch%10*10:(epoch+2)%10*10]):
+        for i, dir_ in enumerate(dir_ls):
+        #for i, dir_ in enumerate(dir_ls[epoch%10*10:(epoch+2)%10*10]):
             data_train_ls.append(glob.glob(dir_+"/*.jpg"))
 
         data_train = []
         for dir_ in data_train_ls:
-            # print(epoch, len(dir_), dir_[0].split("\\")[-1])
-            for x in dir_[(epoch//10*10)%len(dir_):(epoch//10*10+20)%len(dir_)]:
+            for x in dir_:
+            #for x in dir_[(epoch//10*10)%len(dir_):(epoch//10*10+20)%len(dir_)]:
                 data_train.append(imread(x))
-
-        #print(len(data_train))#, len(data_train[0]))
-        # data_train_ls = glob.glob("train_img/PINS/pins_zendaya/*.jpg")
-        # data_train = [imread(x) for x in data_train_ls]
-        #print("Train set size:", len(data_train))
-        #continue
 
         random.shuffle(data_train)
 
@@ -131,6 +131,8 @@ def main():
         for x in batches:
             vae.train()
             vae.zero_grad()
+            if device == "cuda":
+                x = x.cuda()
             rec, mu, logvar = vae(x)
 
             loss_re, loss_kl = loss_function(rec, x, mu, logvar)
@@ -182,7 +184,7 @@ def main():
         del batches
         del data_train
     
-    plt_rec_kl_loss(rec_loss, kl_loss)
+    plt_rec_kl_loss(rec_loss_history, kl_loss_history)
 
     print("Training finish!... save training results")
     torch.save(vae.state_dict(), "VAEmodel.pkl")
