@@ -1,7 +1,6 @@
 ### 開発日記
 
 Qiitaで記録中
-https://qiita.com/roki_ML/private/481de72839eae7cf98ff
 
 ### ファイル構成
 
